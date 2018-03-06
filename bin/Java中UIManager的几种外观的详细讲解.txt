@@ -1,0 +1,11 @@
+					Java中UIManager的几种外观的详细讲
+ 设置图形界面外观
+ java的图形界面外观有3种,默认是java的金属外观,还有就是windows系统,motif系统外观.
+ 1、Metal风格 (默认) UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel"); 
+ 2、Windows风格 UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel"); 
+ 3、Windows Classic风格 UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel");
+ 4、Motif风格UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+ 5、Mac风格 (需要在相关的操作系统上方可实现) String lookAndFeel = "com.sun.java.swing.plaf.mac.MacLookAndFeel";UIManager.setLookAndFeel(lookAndFeel);
+ 6、GTK风格 (需要在相关的操作系统上方可实现) String lookAndFeel = "com.sun.java.swing.plaf.gtk.GTKLookAndFeel";UIManager.setLookAndFeel(lookAndFeel);
+ 7、可跨平台的默认风格 String lookAndFeel = UIManager.getCrossPlatformLookAndFeelClassName(); UIManager.setLookAndFeel(lookAndFeel);
+ 8、当前系统的风格 String lookAndFeel = UIManager.getSystemLookAndFeelClassName(); UIManager.setLookAndFeel(lookAndFeel);

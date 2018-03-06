@@ -1,0 +1,213 @@
+							如何生成后缀表达式
+							
+如果计算一个表达式，比如 4+5+6*2，随着计算器的不同，简单的四功能计算器是30，许多科学计算器知道乘法的优先级高于加法，所以科学答案是21。
+典型计算顺序可以是计算4+5，存为临时变量a，再计算6*2，存为b，最后计算a+b可得出最后结果。这种操作顺序如下：45+62*+
+　　
+这种记法就是后缀表达式，其求值的过程就是上面描述的整个过程。
+
+那如何生成后缀表达式呢，也就是从中缀表达式转换为后缀表达式，可以借助于栈来实现，整个步骤如下：
+1.依次读取输入的表达式，如果是操作数，则把它放入到输出中。
+2.如果是操作符，栈为空的话直接将该操作符入栈；如果栈非空，则比较栈顶操作符和该操作符优先级，如果栈顶操作符优先级小于该操作符，则该操作符入栈；
+    否则弹出栈顶操作符并将其放入到输出中，直到栈为空或者发现优先级更低的操作符为止。
+3.如果是括号，比如'('和')'，则特殊处理。如果是'('的话，直接入栈；如果是')'，那么就将栈顶操作符弹出写入到输出中，
+    直到遇到一个对应的'('，但是这个'('只弹出不写入到输出中。注意："("可以理解为优先级最高。
+4.当表达式读取完毕后，如果栈中还有操作符，则依次弹出操作符并写入到输出中。
+比如(1+2)*(3+2)-4/2表达式，其后缀表达式和计算结果为：
+	1 2 + 3 2 + * 4 2 / -
+	13
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Stack;
+public class MyComputer {
+    public static int computer(String input) {
+        List<String> cutList = cutInput(input);
+        List<String> afterList = getAfterList(cutList);
+
+        return getResultFromAfterList(afterList);
+    }
+    /**
+     * 根据后缀表达式计算结果
+     */
+    private static int getResultFromAfterList(List<String> afterList) {
+        Stack<Integer> stack = new Stack<>();
+
+        for (String ele : afterList) {
+            if (isFlag(ele.charAt(0))) {
+                int b = stack.pop();
+                int a = stack.pop();
+
+                stack.push(cal(a, b, ele.charAt(0)));
+            } else {
+                stack.push(Integer.valueOf(ele));
+            }
+        }
+
+        if (stack.size() != 1) {
+            throw new StackOverflowError();
+        }
+        return stack.pop();
+    }
+
+    /**
+     * 获取两个数的计算结果
+     */
+    private static int cal(int a, int b, char flag) {
+        int result = 0;
+
+        switch (flag) {
+            case '+': {
+                result = a + b;
+                break;
+            }
+            case '-': {
+                result = a - b;
+                break;
+            }
+            case '*': {
+                result = a * b;
+                break;
+            }
+            case '/': {
+                result = a / b;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * 生成后缀表达式
+     */
+    private static List<String> getAfterList(List<String> cutList) {
+        List<String> output = new ArrayList<>();
+        Stack<Character> stack = new Stack<>();
+
+        for (String ele : cutList) {
+            char flag = ele.charAt(0);
+            if (isFlag(ele.charAt(0)) || (flag == '(') || (flag == ')')) {
+                // 计算符入栈
+                if (stack.isEmpty()) {
+                    stack.push(flag);
+                } else {
+                    // 如果待入栈计算符大于栈顶计算符，则直接入栈；否则出栈直到栈为空或者待入栈计算符小于栈顶计算符
+                    if (flag == '(') {
+                        stack.push(flag);
+                    } else if (flag == ')') {
+                        while (stack.peek() != '(') {
+                            output.add(String.valueOf(stack.pop()));
+                        }
+                        stack.pop();
+                    }
+                    else if (isFlagSmaller(stack.peek(), flag)) {
+                        stack.push(flag);
+                    } else if (stack.peek() == '(') {
+                        stack.push(flag);
+                    } else{
+                        do {
+                            if (stack.peek() == '(') {
+                                break;
+                            }
+                            output.add(String.valueOf(stack.pop()));
+                        } while (!stack.isEmpty() && !isFlagSmaller(stack.peek(), flag));
+                        stack.push(flag);
+                    }
+                }
+            } else {
+                // 数字直接添加到输出中
+                output.add(ele);
+            }
+        }
+
+        while (!stack.isEmpty()) {
+            if ((stack.peek() != '(') || (stack.peek() != ')')) {
+                output.add(String.valueOf(stack.pop()));
+            }
+        }
+
+        return output;
+    }
+
+    /**
+     * 将字符串以操作符为分隔符切片
+     */
+    private static List<String> cutInput(String input) {
+        List<String> cutList = new ArrayList<>();
+        boolean running = true;
+
+        while ((input.length() > 0) && running) {
+            char c = input.charAt(0);
+            if (isFlag(c) || (c == '(') || (c == ')')) {
+                cutList.add(String.valueOf(c));
+                input = input.substring(1);
+            } else {
+                for (int i = 0; i < input.length(); i++) {
+                    char tmpC = input.charAt(i);
+                    if (isFlag(tmpC) || (tmpC == '(') || (tmpC == ')')) {
+                        cutList.add(input.substring(0, i));
+                        cutList.add(String.valueOf(tmpC));
+
+                        input = input.substring(i + 1);
+                        break;
+                    }
+
+                    if (i == input.length() - 1) {
+                        cutList.add(input);
+                        running = false;
+                    }
+                }
+            }
+        }
+
+        return cutList;
+    }
+
+    /**
+     * 判断一个字符是否是操作符
+     */
+    private static boolean isFlag(char c) {
+        return (c == '+' || c == '-' || c == '*' || c == '/');
+    }
+
+    /**
+     * 第一个操作符优先级是否小于第二个
+     */
+    private static boolean isFlagSmaller(char a, char b) {
+        boolean flag = true;
+
+        switch (a) {
+            case '+':
+            case '-': {
+                if ((b == '+') || (b == '-')) {
+                    flag = false;
+                }
+                break;
+            }
+
+            case '*':
+            case '/': {
+                flag = false;
+            }
+            case '(': {
+                flag = false;
+            }
+            default: {
+                break;
+            }
+        }
+
+        return flag;
+    }
+}
+
+后缀表达式和表达式树
+
+表达式树是由后缀表达式构造而来的，那么如何构造呢，也是借助于栈来实现。上述代码已经实现了从中缀表达式转换为为后缀表达式，整个步骤大致如下：
+
+1.依次遍历后缀表达式，如果是如果是操作数，则以其为数据创建一个单节点书，然后将该树入栈。
+2.如果是操作符，则从栈中弹出2棵树T1和T2(T1先弹出)并形成一个新的书，该树的根就是该操作符，左右孩子分别是T2和T1，然后将这棵新树入栈。
+3.最后栈中会剩下一棵树，则这棵树就是表达式树。
+ 

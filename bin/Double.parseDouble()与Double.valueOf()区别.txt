@@ -1,0 +1,36 @@
+						Double.parseDouble()与Double.valueOf()区别
+						
+Double.parseDouble方法是把数字类型的字符串，转换成double类型
+Double.valueOf方法是把数字类型的字符串，转换成Double类型
+
+1	double a = 0.009;
+2	String b = "1993";
+3
+4	double parseDouble = Double.parseDouble(b);
+5	System.out.println(parseDouble);
+6 	Double valueOf = Double.valueOf(a); //1993.0
+7	Double valueOf2 = Double.valueOf(b);
+8	System.out.println(valueOf);//0.009
+9	System.out.println(valueOf2);//1993.0
+
+结果是：
+1	1993.0
+2	0.009
+3	1993.0
+
+可以看出大体是没有任何区别，就是返回值的类型区别！
+
+	Double.parseDouble()方法的源码：
+1	public static double parseDouble(String s) throws NumberFormatException {
+2		return FloatingDecimal.readJavaFormatString(s).doubleValue();
+3	}
+
+Double.valueOf()方法的源码：
+
+1	public static Double valueOf(String s) throws NumberFormatException {
+2		return new Double(FloatingDecimal.readJavaFormatString(s).doubleValue());
+3	}
+
+valueOf方法在返回的时候new Double()，所以返回的是Double.
+
+
